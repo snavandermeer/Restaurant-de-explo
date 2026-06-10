@@ -1,0 +1,432 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beheer · Restaurant de Explo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: #0E0600; color: #F5E6C8; font-family: 'Lato', sans-serif; min-height: 100vh; }
+
+  .header {
+    background: #1A0A00;
+    border-bottom: 1px solid rgba(200,134,10,0.3);
+    padding: 1.25rem 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.4rem;
+    color: #E8A820;
+  }
+  .header-sub { font-size: 0.75rem; color: rgba(245,230,200,0.45); margin-top: 0.2rem; }
+
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    padding: 2rem;
+  }
+  .stat-card {
+    background: #1A0A00;
+    border: 1px solid rgba(200,134,10,0.2);
+    border-radius: 6px;
+    padding: 1.5rem;
+  }
+  .stat-label { font-size: 0.65rem; letter-spacing: 0.25em; text-transform: uppercase; color: #C8860A; margin-bottom: 0.5rem; }
+  .stat-value { font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 700; color: #E8A820; }
+  .stat-sub { font-size: 0.75rem; color: rgba(245,230,200,0.45); margin-top: 0.3rem; }
+
+  .section { padding: 0 2rem 2rem; }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    color: #E8A820;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(200,134,10,0.2);
+  }
+
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  th {
+    background: #1A0A00;
+    color: #C8860A;
+    font-size: 0.65rem;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    padding: 0.75rem 1rem;
+    text-align: left;
+    border-bottom: 1px solid rgba(200,134,10,0.2);
+  }
+  td {
+    padding: 0.85rem 1rem;
+    border-bottom: 1px solid rgba(200,134,10,0.08);
+    color: rgba(245,230,200,0.85);
+    vertical-align: top;
+  }
+  tr:hover td { background: rgba(200,134,10,0.05); }
+
+  .badge {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    border-radius: 50px;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+  .badge-bier { background: rgba(200,134,10,0.2); color: #E8A820; }
+  .badge-wijn { background: rgba(139,37,0,0.3); color: #FF8C69; }
+
+  .btn {
+    background: none;
+    border: 1px solid rgba(200,134,10,0.3);
+    color: #C8860A;
+    padding: 0.35rem 0.75rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn:hover { background: rgba(200,134,10,0.15); border-color: #C8860A; }
+  .btn-danger { border-color: rgba(255,68,68,0.3); color: #FF4444; }
+  .btn-danger:hover { background: rgba(255,68,68,0.1); border-color: #FF4444; }
+
+  .plekken-control {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    background: #1A0A00;
+    border: 1px solid rgba(200,134,10,0.2);
+    border-radius: 6px;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .plekken-label { font-size: 0.75rem; letter-spacing: 0.15em; text-transform: uppercase; color: #C8860A; }
+  .plekken-num {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    color: #E8A820;
+    min-width: 3rem;
+    text-align: center;
+  }
+  .plekken-btn {
+    background: rgba(200,134,10,0.15);
+    border: 1px solid rgba(200,134,10,0.3);
+    color: #E8A820;
+    width: 36px; height: 36px;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .plekken-btn:hover { background: rgba(200,134,10,0.3); }
+
+  .empty { text-align: center; padding: 3rem; color: rgba(245,230,200,0.35); font-style: italic; }
+
+  .refresh-btn {
+    background: linear-gradient(135deg, #C8860A, #E8A820);
+    color: #0E0600;
+    border: none;
+    padding: 0.6rem 1.5rem;
+    border-radius: 4px;
+    font-weight: 700;
+    font-size: 0.8rem;
+    cursor: pointer;
+    letter-spacing: 0.1em;
+  }
+
+  /* Edit modal */
+  .modal { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85); z-index:999; align-items:center; justify-content:center; }
+  .modal.open { display:flex; }
+  .modal-box {
+    background: #1A0A00;
+    border: 1px solid rgba(200,134,10,0.4);
+    border-radius:8px;
+    padding: 2rem;
+    width: 500px;
+    max-width: 95vw;
+    max-height: 90vh;
+    overflow-y: auto;
+  }
+  .modal-title { font-family:'Playfair Display',serif; font-size:1.2rem; color:#E8A820; margin-bottom:1.5rem; }
+  .form-group { margin-bottom:1rem; }
+  .form-label { font-size:0.65rem; letter-spacing:0.2em; text-transform:uppercase; color:#C8860A; display:block; margin-bottom:0.4rem; }
+  .form-input, .form-select {
+    width:100%; padding:0.65rem 0.9rem;
+    background:rgba(14,6,0,0.8);
+    border:1px solid rgba(200,134,10,0.25);
+    border-radius:3px; color:#F5E6C8;
+    font-size:0.9rem;
+  }
+  .modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; }
+  .btn-save { background:linear-gradient(135deg,#C8860A,#E8A820); color:#0E0600; border:none; padding:0.75rem 1.5rem; border-radius:4px; font-weight:700; cursor:pointer; flex:1; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div>
+    <div class="header-title">🔐 Beheerder · Restaurant de Explo</div>
+    <div class="header-sub">5 Jaar Jubileum High Tea · Zondag 5 Juli 2026</div>
+  </div>
+  <button class="refresh-btn" onclick="laadAlles()">↻ Vernieuwen</button>
+</div>
+
+<!-- Stats -->
+<div class="stats-grid">
+  <div class="stat-card">
+    <div class="stat-label">Reserveringen</div>
+    <div class="stat-value" id="statAantal">—</div>
+    <div class="stat-sub">ingevuld formulier</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Personen totaal</div>
+    <div class="stat-value" id="statPersonen">—</div>
+    <div class="stat-sub">gereserveerde plaatsen</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Verwachte inkomsten</div>
+    <div class="stat-value" id="statInkomsten">—</div>
+    <div class="stat-sub">à €22,50 p.p.</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Beschikbare plekken</div>
+    <div class="stat-value" id="statPlekken">—</div>
+    <div class="stat-sub">van de 30</div>
+  </div>
+</div>
+
+<!-- Plekken beheer -->
+<div class="section">
+  <div class="section-title">Plekken beheren</div>
+  <div class="plekken-control">
+    <span class="plekken-label">Beschikbaar:</span>
+    <button class="plekken-btn" onclick="pasPlekkenAan(-1)">−</button>
+    <span class="plekken-num" id="plekkenNum">—</span>
+    <button class="plekken-btn" onclick="pasPlekkenAan(1)">+</button>
+    <span style="font-size:0.75rem;color:rgba(245,230,200,0.4);margin-left:0.5rem;">Handmatig aanpassen</span>
+  </div>
+</div>
+
+<!-- Reserveringen tabel -->
+<div class="section">
+  <div class="section-title">Alle reserveringen</div>
+  <div class="table-wrap">
+    <table id="reserveringenTabel">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Naam</th>
+          <th>E-mail</th>
+          <th>Telefoon</th>
+          <th>Personen</th>
+          <th>Bedrag</th>
+          <th>Dranken</th>
+          <th>Dieet</th>
+          <th>Opmerking</th>
+          <th>Datum</th>
+          <th>Acties</th>
+        </tr>
+      </thead>
+      <tbody id="reserveringenBody">
+        <tr><td colspan="11" class="empty">Laden...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Edit modal -->
+<div class="modal" id="editModal">
+  <div class="modal-box">
+    <div class="modal-title">✏️ Reservering bewerken</div>
+    <input type="hidden" id="editId">
+    <div class="form-group">
+      <label class="form-label">Naam</label>
+      <input class="form-input" id="editNaam" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">E-mail</label>
+      <input class="form-input" id="editEmail" type="email">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Telefoon</label>
+      <input class="form-input" id="editTel" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Aantal personen</label>
+      <input class="form-input" id="editPersonen" type="number" min="1" max="30">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dranken</label>
+      <input class="form-input" id="editDranken" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Dieetwensen</label>
+      <input class="form-input" id="editDieet" type="text">
+    </div>
+    <div class="form-group">
+      <label class="form-label">Opmerkingen</label>
+      <input class="form-input" id="editOpmerking" type="text">
+    </div>
+    <div class="modal-actions">
+      <button class="btn-save" onclick="slaOp()">💾 Opslaan</button>
+      <button class="btn btn-danger" onclick="verwijder()">🗑 Verwijderen</button>
+      <button class="btn" onclick="document.getElementById('editModal').classList.remove('open')">Annuleren</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SUPABASE_URL = 'https://dwrvfchyvpzevbyvambs.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_5uiU88qn1tsmegQ28oknNQ_9LUMIvX0';
+
+const headers = {
+  'apikey': SUPABASE_KEY,
+  'Authorization': 'Bearer ' + SUPABASE_KEY,
+  'Content-Type': 'application/json'
+};
+
+let huidigePlekken = 30;
+let alleReserveringen = [];
+
+async function laadAlles() {
+  await laadReserveringen();
+  await laadPlekken();
+}
+
+async function laadPlekken() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/plekken?id=eq.1', { headers });
+    const data = await res.json();
+    huidigePlekken = data[0]?.beschikbaar ?? 30;
+    document.getElementById('plekkenNum').textContent = huidigePlekken;
+    document.getElementById('statPlekken').textContent = huidigePlekken;
+  } catch(e) {}
+}
+
+async function laadReserveringen() {
+  try {
+    const res = await fetch(SUPABASE_URL + '/rest/v1/reserveringen?order=aangemaakt_op.desc', { headers });
+    if (!res.ok) {
+      // Tabel bestaat nog niet
+      document.getElementById('reserveringenBody').innerHTML = '<tr><td colspan="11" class="empty">Nog geen reserveringen — tabel wordt aangemaakt bij eerste reservering.</td></tr>';
+      updateStats([]);
+      return;
+    }
+    alleReserveringen = await res.json();
+    renderTabel(alleReserveringen);
+    updateStats(alleReserveringen);
+  } catch(e) {
+    document.getElementById('reserveringenBody').innerHTML = '<tr><td colspan="11" class="empty">Fout bij laden. Vernieuw de pagina.</td></tr>';
+  }
+}
+
+function updateStats(data) {
+  const aantal = data.length;
+  const personen = data.reduce((s, r) => s + (parseInt(r.aantal_personen) || 0), 0);
+  const inkomsten = personen * 22.50;
+  document.getElementById('statAantal').textContent = aantal;
+  document.getElementById('statPersonen').textContent = personen;
+  document.getElementById('statInkomsten').textContent = '€ ' + inkomsten.toFixed(2).replace('.', ',');
+}
+
+function renderTabel(data) {
+  const tbody = document.getElementById('reserveringenBody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="11" class="empty">Nog geen reserveringen</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map((r, i) => {
+    const dranken = r.dranken_meerprijs && r.dranken_meerprijs !== 'Geen'
+      ? r.dranken_meerprijs.split(',').map(d => `<span class="badge badge-${d.trim().toLowerCase().includes('bier') ? 'bier' : 'wijn'}">${d.trim()}</span>`).join(' ')
+      : '<span style="color:rgba(245,230,200,0.3)">—</span>';
+    const datum = r.aangemaakt_op ? new Date(r.aangemaakt_op).toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '—';
+    return `<tr>
+      <td style="color:rgba(245,230,200,0.4)">${i+1}</td>
+      <td><strong>${r.naam || '—'}</strong></td>
+      <td>${r.email || '—'}</td>
+      <td>${r.telefoonnummer || '—'}</td>
+      <td style="text-align:center;font-family:'Playfair Display',serif;font-size:1.1rem;color:#E8A820">${r.aantal_personen || '—'}</td>
+      <td style="color:#E8A820">€ ${((parseInt(r.aantal_personen)||0) * 22.5).toFixed(2).replace('.',',')}</td>
+      <td>${dranken}</td>
+      <td style="color:rgba(245,230,200,0.6)">${r.dieetwensen && r.dieetwensen !== 'Geen' ? r.dieetwensen : '—'}</td>
+      <td style="color:rgba(245,230,200,0.6)">${r.opmerkingen && r.opmerkingen !== 'Geen' ? r.opmerkingen : '—'}</td>
+      <td style="color:rgba(245,230,200,0.4);font-size:0.75rem">${datum}</td>
+      <td><button class="btn" onclick="openEdit(${i})">✏️</button></td>
+    </tr>`;
+  }).join('');
+}
+
+function openEdit(index) {
+  const r = alleReserveringen[index];
+  document.getElementById('editId').value = r.id;
+  document.getElementById('editNaam').value = r.naam || '';
+  document.getElementById('editEmail').value = r.email || '';
+  document.getElementById('editTel').value = r.telefoonnummer || '';
+  document.getElementById('editPersonen').value = r.aantal_personen || '';
+  document.getElementById('editDranken').value = r.dranken_meerprijs || '';
+  document.getElementById('editDieet').value = r.dieetwensen || '';
+  document.getElementById('editOpmerking').value = r.opmerkingen || '';
+  document.getElementById('editModal').classList.add('open');
+}
+
+async function slaOp() {
+  const id = document.getElementById('editId').value;
+  const body = {
+    naam: document.getElementById('editNaam').value,
+    email: document.getElementById('editEmail').value,
+    telefoonnummer: document.getElementById('editTel').value,
+    aantal_personen: parseInt(document.getElementById('editPersonen').value),
+    dranken_meerprijs: document.getElementById('editDranken').value,
+    dieetwensen: document.getElementById('editDieet').value,
+    opmerkingen: document.getElementById('editOpmerking').value
+  };
+  await fetch(SUPABASE_URL + '/rest/v1/reserveringen?id=eq.' + id, {
+    method: 'PATCH',
+    headers: { ...headers, 'Prefer': 'return=minimal' },
+    body: JSON.stringify(body)
+  });
+  document.getElementById('editModal').classList.remove('open');
+  laadAlles();
+}
+
+async function verwijder() {
+  if (!confirm('Weet je zeker dat je deze reservering wilt verwijderen?')) return;
+  const id = document.getElementById('editId').value;
+  await fetch(SUPABASE_URL + '/rest/v1/reserveringen?id=eq.' + id, {
+    method: 'DELETE',
+    headers
+  });
+  document.getElementById('editModal').classList.remove('open');
+  laadAlles();
+}
+
+async function pasPlekkenAan(delta) {
+  const nieuw = Math.max(0, Math.min(30, huidigePlekken + delta));
+  await fetch(SUPABASE_URL + '/rest/v1/plekken?id=eq.1', {
+    method: 'PATCH',
+    headers: { ...headers, 'Prefer': 'return=minimal' },
+    body: JSON.stringify({ beschikbaar: nieuw })
+  });
+  huidigePlekken = nieuw;
+  document.getElementById('plekkenNum').textContent = nieuw;
+  document.getElementById('statPlekken').textContent = nieuw;
+}
+
+// Sluit modal bij klik buiten
+document.getElementById('editModal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('open');
+});
+
+laadAlles();
+</script>
+</body>
+</html>
