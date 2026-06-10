@@ -1318,7 +1318,7 @@ async function handleSubmit() {
       });
 
       // Update spots in Supabase
-      spots = Math.max(0, spots - 1);
+      spots = Math.max(0, spots - qty);
       document.getElementById('spotsCount').textContent = spots;
       if (spots <= 3) document.getElementById('spotsCount').style.color = '#FF4444';
       await updatePlekken(spots);
