@@ -168,9 +168,58 @@
   }
   .modal-actions { display:flex; gap:0.75rem; margin-top:1.5rem; }
   .btn-save { background:linear-gradient(135deg,#C8860A,#E8A820); color:#0E0600; border:none; padding:0.75rem 1.5rem; border-radius:4px; font-weight:700; cursor:pointer; flex:1; }
+
+  /* Login overlay */
+  #loginOverlay {
+    position: fixed; inset: 0;
+    background: #0E0600;
+    z-index: 99999;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .login-box {
+    background: #1A0A00;
+    border: 1px solid rgba(200,134,10,0.4);
+    border-radius: 8px;
+    padding: 2.5rem;
+    width: 340px;
+    text-align: center;
+  }
+  .login-title { font-family: 'Playfair Display', serif; font-size: 1.4rem; color: #E8A820; margin-bottom: 1.5rem; }
+  .login-input {
+    width: 100%; padding: 0.85rem;
+    background: rgba(14,6,0,0.8);
+    border: 1px solid rgba(200,134,10,0.3);
+    border-radius: 4px; color: #F5E6C8;
+    font-size: 1rem; margin-bottom: 1rem;
+    box-sizing: border-box;
+  }
+  .login-btn {
+    width: 100%;
+    background: linear-gradient(135deg,#C8860A,#E8A820);
+    color: #0E0600; border: none;
+    padding: 0.9rem; border-radius: 4px;
+    font-weight: 700; font-size: 0.9rem;
+    cursor: pointer; letter-spacing: 0.1em;
+  }
+  .login-error { color: #FF4444; font-size: 0.8rem; margin-top: 0.75rem; display: none; }
+
+  /* Hide main content until authenticated */
+  #mainContent { display: none; }
 </style>
 </head>
 <body>
+
+<!-- Login overlay -->
+<div id="loginOverlay">
+  <div class="login-box">
+    <div class="login-title">🔐 Beheerder · Restaurant de Explo</div>
+    <input id="loginWW" type="password" class="login-input" placeholder="Wachtwoord" onkeydown="if(event.key==='Enter')checkLogin()">
+    <button class="login-btn" onclick="checkLogin()">Inloggen</button>
+    <div id="loginError" class="login-error">Onjuist wachtwoord</div>
+  </div>
+</div>
+
+<div id="mainContent">
 
 <div class="header">
   <div>
@@ -426,7 +475,20 @@ document.getElementById('editModal').addEventListener('click', function(e) {
   if (e.target === this) this.classList.remove('open');
 });
 
-laadAlles();
+function checkLogin() {
+  const ww = document.getElementById('loginWW').value;
+  if (ww === 'rsa782') {
+    document.getElementById('loginOverlay').style.display = 'none';
+    document.getElementById('mainContent').style.display = 'block';
+    laadAlles();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginWW').value = '';
+  }
+}
+
+document.getElementById('loginWW').focus();
 </script>
+</div>
 </body>
 </html>
